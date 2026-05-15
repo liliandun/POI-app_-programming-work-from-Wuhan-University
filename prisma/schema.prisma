@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -37,7 +37,7 @@ model Poi {
   id          String    @id @default(cuid())
   name        String
   category    String
-  description String
+  description String    @db.Text
   longitude   Float
   latitude    Float
   address     String    @default("")
@@ -73,7 +73,7 @@ model Verification {
   id               String             @id @default(cuid())
   poiId            String
   verifierId       String
-  errorDescription String
+  errorDescription String             @db.Text
   newPhotos        Json               @default("[]")
   newLongitude     Float?
   newLatitude      Float?
@@ -105,7 +105,7 @@ model Message {
   fromUserId String
   toUserId   String
   type       MessageType
-  content    String
+  content    String      @db.Text
   poiId      String?
   isRead     Boolean     @default(false)
   createdAt  DateTime    @default(now())
@@ -161,7 +161,7 @@ model DiscussionMessage {
   id           String   @id @default(cuid())
   discussionId String
   userId       String
-  content      String
+  content      String   @db.Text
   createdAt    DateTime @default(now())
 
   // 关联

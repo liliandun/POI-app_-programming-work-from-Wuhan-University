@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ===== 用户表 =====
+model User {
+  id        String   @id @default(cuid())
+  openId    String   @unique // 微信 OpenID
+  nickname  String
+  avatar    String   @default("")
+  role      UserRole @default(COLLECTOR)
+  createdAt DateTime @default(now())
+
+  // 关联
+  pois              Poi[]
+  verifications     Verification[]
+  sentMessages      Message[]          @relation("SentMessages")
+  receivedMessages  Message[]          @relation("ReceivedMessages")
+  discussionMessages DiscussionMessage[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  COLLECTOR
+  VERIFIER
+  ADMIN
+}
+
+// ===== POI 表 =====
+model Poi {
+  id          String    @id @default(cuid())
+  name        String
+  category    String
+  description String
+  longitude   Float
+  latitude    Float
+  address     String    @default("")
+  photos      Json      @default("[]")
+  status      PoiStatus @default(PENDING)
+  collectorId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  collector     User           @relation(fields: [collectorId], references: [id])
+  verifications Verification[]
+  messages      Message[]
+  discussions   Discussion[]
+
+  @@index([collectorId])
+  @@index([status])
+  @@index([category])
+  @@map("pois")
+}
+
+enum PoiStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+  CORRECTED
+  REJECTED
+}
+
+// ===== 核验表 =====
+model Verification {
+  id               String             @id @default(cuid())
+  poiId            String
+  verifierId       String
+  errorDescription String
+  newPhotos        Json               @default("[]")
+  newLongitude     Float?
+  newLatitude      Float?
+  newCategory      String?
+  newDescription   String?
+  status           VerificationStatus @default(PENDING)
+  createdAt        DateTime           @default(now())
+
+  // 关联
+  poi         Poi          @relation(fields: [poiId], references: [id])
+  verifier    User         @relation(fields: [verifierId], references: [id])
+  discussions Discussion[]
+
+  @@index([poiId])
+  @@index([verifierId])
+  @@map("verifications")
+}
+
+enum VerificationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  DISPUTED
+}
+
+// ===== 消息表 =====
+model Message {
+  id         String      @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  type       MessageType
+  content    String
+  poiId      String?
+  isRead     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  // 关联
+  fromUser User  @relation("SentMessages", fields: [fromUserId], references: [id])
+  toUser   User  @relation("ReceivedMessages", fields: [toUserId], references: [id])
+  poi      Poi?  @relation(fields: [poiId], references: [id])
+
+  @@index([toUserId, isRead])
+  @@index([fromUserId])
+  @@map("messages")
+}
+
+enum MessageType {
+  ERROR_NOTIFY
+  RESULT_NOTIFY
+  SYSTEM
+}
+
+// ===== 讨论表 =====
+model Discussion {
+  id              String           @id @default(cuid())
+  poiId           String
+  verificationId  String
+  status          DiscussionStatus @default(OPEN)
+  adminDecision   AdminDecision?
+  resolvedAt      DateTime?
+  createdAt       DateTime         @default(now())
+
+  // 关联
+  poi          Poi                 @relation(fields: [poiId], references: [id])
+  verification Verification        @relation(fields: [verificationId], references: [id])
+  messages     DiscussionMessage[]
+
+  @@index([poiId])
+  @@index([verificationId])
+  @@map("discussions")
+}
+
+enum DiscussionStatus {
+  OPEN
+  RESOLVED
+}
+
+enum AdminDecision {
+  SUPPORT_COLLECTOR
+  SUPPORT_VERIFIER
+}
+
+// ===== 讨论消息表 =====
+model DiscussionMessage {
+  id           String   @id @default(cuid())
+  discussionId String
+  userId       String
+  content      String
+  createdAt    DateTime @default(now())
+
+  // 关联
+  discussion Discussion @relation(fields: [discussionId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@index([discussionId])
+  @@map("discussion_messages")
+}

@@ -1,0 +1,46 @@
+{
+  "_comment": "微信公众号自定义菜单配置 - 通过微信公众平台 API 创建",
+  "_api": "POST https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN",
+  "button": [
+    {
+      "type": "view",
+      "name": "进入系统",
+      "url": "https://your-domain.com/login"
+    },
+    {
+      "name": "数据中心",
+      "sub_button": [
+        {
+          "type": "view",
+          "name": "POI 列表",
+          "url": "https://your-domain.com/dashboard/poi"
+        },
+        {
+          "type": "view",
+          "name": "地图视图",
+          "url": "https://your-domain.com/dashboard/map"
+        },
+        {
+          "type": "view",
+          "name": "消息中心",
+          "url": "https://your-domain.com/dashboard/messages"
+        }
+      ]
+    },
+    {
+      "name": "更多",
+      "sub_button": [
+        {
+          "type": "view",
+          "name": "核验审批",
+          "url": "https://your-domain.com/dashboard/verify"
+        },
+        {
+          "type": "view",
+          "name": "讨论",
+          "url": "https://your-domain.com/dashboard/discussions"
+        }
+      ]
+    }
+  ]
+}

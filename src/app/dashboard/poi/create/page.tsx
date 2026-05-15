@@ -1,24 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import POIForm from "@/components/poi/POIForm";
 
 export default function CreatePOIPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
+    const name = formData.get("name")?.toString().trim();
+    const category = formData.get("category")?.toString().trim();
+    const longitude = formData.get("longitude")?.toString();
+    const latitude = formData.get("latitude")?.toString();
+
+    if (!name) { alert("请输入 POI 名称"); return; }
+    if (!category) { alert("请选择 POI 分类"); return; }
+    if (!longitude || !latitude || isNaN(Number(longitude)) || isNaN(Number(latitude))) {
+      alert("请在地图上选择坐标，或手动输入经纬度");
+      return;
+    }
+
     setLoading(true);
     try {
       const data = {
-        name: formData.get("name"),
-        category: formData.get("category"),
-        address: formData.get("address"),
-        longitude: formData.get("longitude"),
-        latitude: formData.get("latitude"),
+        name,
+        category,
+        address: formData.get("address") || "",
+        longitude,
+        latitude,
         description: formData.get("description") || "",
         photos: [],
       };
@@ -28,10 +38,11 @@ export default function CreatePOIPage() {
         body: JSON.stringify(data),
       });
       if (res.ok) {
-        router.push("/dashboard/poi");
+        alert("POI 创建成功！");
+        window.location.href = "/dashboard/poi";
       } else {
-        const err = await res.json();
-        alert(err.error || "创建失败");
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "创建失败，请重试");
       }
     } catch {
       alert("请求失败，请检查网络连接");

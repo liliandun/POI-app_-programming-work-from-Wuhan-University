@@ -38,21 +38,37 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "请先登录" }, { status: 401 });
   }
 
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  const poi = await prisma.poi.create({
-    data: {
-      name: body.name,
-      category: body.category,
-      description: body.description || "",
-      longitude: parseFloat(body.longitude),
-      latitude: parseFloat(body.latitude),
-      address: body.address || "",
-      photos: body.photos || [],
-      collectorId: user.id,
-    },
-    include: { collector: true },
-  });
+    const name = body.name?.trim();
+    const category = body.category?.trim();
+    const longitude = parseFloat(body.longitude);
+    const latitude = parseFloat(body.latitude);
 
-  return Response.json({ data: poi }, { status: 201 });
+    if (!name) return Response.json({ error: "名称不能为空" }, { status: 400 });
+    if (!category) return Response.json({ error: "请选择分类" }, { status: 400 });
+    if (isNaN(longitude) || isNaN(latitude)) {
+      return Response.json({ error: "经纬度无效，请在地图上选点或手动输入" }, { status: 400 });
+    }
+
+    const poi = await prisma.poi.create({
+      data: {
+        name,
+        category,
+        description: body.description || "",
+        longitude,
+        latitude,
+        address: body.address || "",
+        photos: body.photos || [],
+        collectorId: user.id,
+      },
+      include: { collector: true },
+    });
+
+    return Response.json({ data: poi }, { status: 201 });
+  } catch (err) {
+    console.error("[API] POST /api/poi error:", err);
+    return Response.json({ error: "创建 POI 失败，请重试" }, { status: 500 });
+  }
 }

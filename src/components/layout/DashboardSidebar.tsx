@@ -69,6 +69,11 @@ const sidebarItems = [
   },
 ];
 
-export default function DashboardSidebar() {
-  return <Sidebar items={sidebarItems} />;
+interface DashboardSidebarProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function DashboardSidebar({ open, onClose }: DashboardSidebarProps) {
+  return <Sidebar items={sidebarItems} open={open} onClose={onClose} />;
 }

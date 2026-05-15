@@ -10,8 +10,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleWeChatLogin = () => {
-    // TODO: 接入微信 OAuth 登录
-    alert("微信登录需要配置 WECHAT_APP_ID，请使用开发模式登录");
+    window.location.href = "/api/wechat/login";
   };
 
   const handleDevLogin = async (role: string) => {

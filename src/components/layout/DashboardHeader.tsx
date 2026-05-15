@@ -15,7 +15,11 @@ const roleLabel: Record<string, string> = {
   ADMIN: "管理员",
 };
 
-export default function DashboardHeader() {
+interface DashboardHeaderProps {
+  onMenuToggle: () => void;
+}
+
+export default function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
 
@@ -32,10 +36,21 @@ export default function DashboardHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/[0.06] bg-[#0c0700]/60 px-6 backdrop-blur-2xl">
-      {/* 搜索 */}
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/[0.06] bg-[#0c0700]/60 px-4 sm:px-6 backdrop-blur-2xl">
+      {/* 左侧: 汉堡菜单 + 搜索 */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-64 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-white/30">
+        {/* 汉堡按钮 - 仅移动端 */}
+        <button
+          onClick={onMenuToggle}
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-white/60 hover:bg-white/[0.06] hover:text-white transition-colors lg:hidden"
+        >
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+
+        {/* 搜索框 */}
+        <div className="hidden sm:flex h-10 w-64 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-white/30">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" className="shrink-0">
             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -44,7 +59,7 @@ export default function DashboardHeader() {
       </div>
 
       {/* 右侧操作区 */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* 消息通知 */}
         <Link
           href="/dashboard/messages"
@@ -63,8 +78,8 @@ export default function DashboardHeader() {
         </Link>
 
         {/* 用户信息 + 退出 */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/[0.04] transition-colors">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 rounded-xl px-2 sm:px-3 py-2 hover:bg-white/[0.04] transition-colors">
             <div className="h-8 w-8 rounded-full bg-[#AB59D7]/30 flex items-center justify-center text-xs text-[#AB59D7] font-medium">
               {user?.nickname?.charAt(0) || "U"}
             </div>
